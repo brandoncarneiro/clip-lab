@@ -23,8 +23,12 @@ export const renderJobs = new Map<string, RenderJob>();
 
 // --- Request validation schema ---
 
+const jobIdSchema = z
+  .string()
+  .regex(/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/, "Invalid job id");
+
 const renderRequestSchema = z.object({
-  jobId: z.string().min(1),
+  jobId: jobIdSchema,
   clipIndex: z.number().int().min(0),
   outputRelativePath: z.string().min(1).optional(),
   props: z.object({

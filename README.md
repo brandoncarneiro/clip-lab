@@ -1,44 +1,93 @@
 # Clip Lab
 
-Clip Lab is an experimental, backend-first pipeline for turning long-form video into short-form
-vertical clips. It provides a Python CLI, a FastAPI service, a Remotion renderer, Docker Compose,
-and a stable output contract for generated clip assets.
+[![CI](https://github.com/sommbc/clip-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/sommbc/clip-lab/actions/workflows/ci.yml)
 
-It is for developers, technical creators, and agencies who want a local, inspectable clip
-generation workflow instead of a hosted black box. The optional web app is only a demo surface; the
-main product is the backend pipeline.
+Local-first pipeline for turning long-form video into short-form vertical clips.
 
-## What It Solves
+Clip Lab is an experimental, backend-first project for developers who want an inspectable clip
+generation workflow: ingest media, use a transcript, select candidate moments, cut clips, reframe
+to 9:16, generate render props, optionally render with Remotion, and package the result.
 
-Long-form video repurposing usually involves several manual steps: ingesting media, transcribing,
-finding moments, cutting clips, reframing to 9:16, adding captions, rendering, and packaging files
-for review. Clip Lab keeps those steps in one reproducible local workflow with deterministic fixture
-mode for development and tests.
+It is not a hosted SaaS, social scheduler, or account system. The supported surface is the Python
+CLI, FastAPI service, Docker Compose stack, Remotion render service, and documented output contract.
 
-## Current Status
+## Why It Exists
 
-Clip Lab is public-ready as an early open-source project, not a polished SaaS product.
+Repurposing long-form video usually turns into a pile of manual steps and one-off scripts. Clip Lab
+keeps the core workflow in a reproducible local pipeline so technical teams can inspect the
+intermediate artifacts, test deterministic fixture runs, and swap in heavier transcription or model
+providers only when needed.
 
-Works today:
+## What Works Today
 
-- CLI and FastAPI job creation
+- Python CLI and FastAPI job creation
 - local file and URL ingest
 - transcript-JSON fixture mode with no model key
 - optional WhisperX transcription
 - deterministic local clip scoring
 - optional OpenRouter-backed clip intelligence
-- FFmpeg cutting and vertical reframing
-- Remotion rendering
-- `metadata.json`, `transcript.json`, `scenes.json`, rendered clips, and `export.zip`
+- FFmpeg cutting and 1080x1920 vertical reframing
+- Remotion render service
+- `metadata.json`, `transcript.json`, `scenes.json`, clip files, render props, and `export.zip`
 
-Current limitations:
+## Current Limits
 
+- early open-source project, not a polished product
 - job state is in memory
-- no auth, accounts, billing, or hosted storage
-- no social posting or scheduling
+- no auth, users, billing, hosted storage, posting, or scheduling
 - real transcription can be slow and resource-heavy
-- OpenRouter model availability and free-model limits can change outside this repo
-- the web app is a demo, not the primary supported interface
+- model-backed intelligence depends on external provider availability and rate limits
+- browser UI is optional and secondary to the backend workflow
+
+## Quickstart
+
+```bash
+git clone https://github.com/sommbc/clip-lab.git
+cd clip-lab
+cp .env.example .env
+docker compose up -d --build --wait
+```
+
+Run the fixture pipeline without WhisperX or model calls:
+
+```bash
+docker compose exec -T api clip-lab /app/fixtures/sample.mp4 \
+  --transcript-json /app/fixtures/sample.transcript.json \
+  --output-root /app/output \
+  --job-id quickstart-fixture \
+  --no-render
+```
+
+Inspect the result:
+
+```bash
+find output/quickstart-fixture -maxdepth 3 -type f | sort
+```
+
+Clean up:
+
+```bash
+docker compose down
+```
+
+## Successful Example
+
+A successful fixture run creates this shape:
+
+```text
+output/quickstart-fixture/
+  audio/source.wav
+  clips/raw/clip_01.mp4
+  clips/vertical/clip_01.mp4
+  metadata.json
+  render_props/clip_01.json
+  scenes.json
+  source/sample.mp4
+  transcript.json
+  export.zip
+```
+
+When rendering is enabled, final MP4s are also written under `clips/rendered/`.
 
 ## Architecture
 
@@ -46,7 +95,7 @@ Current limitations:
 apps/
   api/        FastAPI app and CLI entrypoint
   renderer/   Remotion composition and render service
-  web/        Optional demo dashboard
+  web/        Optional browser UI
 
 packages/
   pipeline/           End-to-end coordinator and output contract
@@ -65,64 +114,25 @@ High-level flow:
 
 ```text
 video -> ingest -> audio -> transcript -> clip candidates -> critic -> packaging
-      -> FFmpeg cuts -> vertical reframe -> Remotion render -> output/<job_id>/
+      -> FFmpeg cuts -> vertical reframe -> Remotion props/render -> output/<job_id>/
 ```
 
-More detail is in [docs/architecture.md](docs/architecture.md).
+More detail: [docs/architecture.md](docs/architecture.md).
 
-## Quickstart
+## Commands
 
-```bash
-git clone https://github.com/sommbc/clip-lab.git
-cd clip-lab
-cp .env.example .env
-docker compose up --build
-```
-
-In another terminal, run the fixture pipeline without WhisperX or model calls:
-
-```bash
-docker compose exec api clip-lab /app/fixtures/sample.mp4 \
-  --transcript-json /app/fixtures/sample.transcript.json \
-  --output-root /app/output \
-  --job-id quickstart-fixture \
-  --no-render
-```
-
-Generated files appear in `output/quickstart-fixture/`.
-
-## Docker
-
-Default Compose services:
-
-- `api`: FastAPI app and `clip-lab` CLI
-- `renderer`: Remotion render service
-
-Useful commands:
-
-```bash
-docker compose build
-docker compose up -d --wait
-docker compose ps
-docker compose logs api
-docker compose logs renderer
-docker compose down
-```
-
-The optional demo web app is behind a profile:
-
-```bash
-docker compose --profile web up --build
-```
-
-WhisperX is intentionally excluded from the default API image. Build the heavier image only when
-real transcription is needed:
-
-```bash
-INSTALL_WHISPERX=true docker compose build api
-```
-
-See [docs/docker.md](docs/docker.md).
+| Task | Command |
+| --- | --- |
+| Start Docker stack | `docker compose up -d --build --wait` |
+| Fixture no-render run | `docker compose exec -T api clip-lab /app/fixtures/sample.mp4 --transcript-json /app/fixtures/sample.transcript.json --output-root /app/output --job-id quickstart-fixture --no-render` |
+| Full fixture render | `docker compose exec -T api clip-lab /app/fixtures/sample.mp4 --transcript-json /app/fixtures/sample.transcript.json --output-root /app/output --job-id quickstart-render` |
+| Python tests | `python -m pytest` |
+| Python lint | `python -m ruff check apps packages tests` |
+| Python compile | `python -m compileall apps/api packages` |
+| Renderer build | `cd apps/renderer && npm ci && npm run build` |
+| Renderer service build | `cd apps/renderer/service && npm ci && npm run build` |
+| Browser UI build | `cd apps/web && npm ci && npm run lint && npm run build` |
+| Stop Docker stack | `docker compose down` |
 
 ## Local Development
 
@@ -135,13 +145,23 @@ python -m pip install --upgrade pip
 python -m pip install -e ".[dev,video]"
 ```
 
+Run local checks:
+
+```bash
+python -m pytest
+python -m ruff check apps packages tests
+python -m compileall apps/api packages
+python -c "import cliplab_api.main; print('api import ok')"
+clip-lab --help
+```
+
 Install renderer dependencies:
 
 ```bash
 cd apps/renderer
-npm install
+npm ci
 cd service
-npm install
+npm ci
 ```
 
 Run the API locally:
@@ -157,35 +177,9 @@ cd apps/renderer/service
 REMOTION_BUNDLE_PATH=.. OUTPUT_DIR=../../../output npm run dev
 ```
 
-## Tests And Checks
+## Environment
 
-```bash
-python -m pytest
-python -m ruff check apps packages tests
-python -m compileall apps/api packages
-python -c "import cliplab_api.main; print('api import ok')"
-clip-lab --help
-```
-
-Renderer and web builds:
-
-```bash
-cd apps/renderer && npm ci && npm run build
-cd service && npm ci && npm run build
-cd ../../web && npm ci && npm run build
-```
-
-Optional web lint:
-
-```bash
-cd apps/web && npm run lint
-```
-
-The optional web demo uses Vite 7 and requires Node `^20.19.0` or `>=22.12.0`.
-
-## Environment Variables
-
-Use `.env.example` as the template. Keep real keys only in local `.env`; `.env` is ignored.
+Use `.env.example` as the template. Real keys belong only in local `.env`; `.env` is ignored.
 
 Core variables:
 
@@ -198,7 +192,7 @@ CLIP_LAB_CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
 INSTALL_WHISPERX=false
 ```
 
-OpenRouter is optional and only used when the CLI/API request enables a model provider:
+OpenRouter is optional and only used when `--use-model-provider` or the matching API field is set:
 
 ```bash
 CLIP_LAB_MODEL_PROVIDER=openrouter
@@ -220,36 +214,28 @@ CLIP_LAB_WHISPERX_ALIGN=true
 HUGGINGFACE_TOKEN=
 ```
 
-## Example Workflow
+## Security And Privacy
 
-1. Start the backend stack:
+Clip Lab is designed for local processing. The default fixture workflow requires no model key,
+account, cookies, private media, or hosted service.
 
-```bash
-docker compose up -d --build --wait
-```
+- Do not commit `.env`, API keys, cookies, uploads, generated clips, or model weights.
+- Uploaded API files are written under `uploads/`; generated jobs are written under `output/`.
+- CLI and API job IDs are constrained to safe path characters before writing output.
+- OpenRouter requests are opt-in and send prompt/transcript content to the configured provider.
+- WhisperX can require model downloads and optional Hugging Face credentials.
 
-2. Run fixture mode:
+See [SECURITY.md](SECURITY.md) and [docs/secrets.md](docs/secrets.md).
 
-```bash
-docker compose exec api clip-lab /app/fixtures/sample.mp4 \
-  --transcript-json /app/fixtures/sample.transcript.json \
-  --output-root /app/output \
-  --job-id demo-fixture
-```
+## Licensing And Attribution
 
-3. Inspect:
+Project code is MIT licensed. Clip Lab does not vendor third-party application source trees, model
+weights, private media, or generated outputs. The bundled Noto Serif font used by the renderer is
+covered by the SIL Open Font License; see [NOTICE.md](NOTICE.md) and
+[LICENSES/OFL-1.1.txt](LICENSES/OFL-1.1.txt).
 
-```text
-output/demo-fixture/
-  clips/raw/
-  clips/vertical/
-  clips/rendered/
-  render_props/
-  metadata.json
-  transcript.json
-  scenes.json
-  export.zip
-```
+Runtime dependencies such as FFmpeg, Remotion, WhisperX, OpenCV, and yt-dlp are installed as
+packages or system tools. Their own licenses apply when users install or build the stack.
 
 ## Roadmap
 
@@ -258,7 +244,13 @@ output/demo-fixture/
 - improve crop quality and speaker-aware framing
 - add sidecar captions such as SRT/VTT
 - add persistent job storage before any hosted deployment
-- keep social posting, auth, teams, billing, and scheduling out of scope until the core pipeline is stronger
+- keep auth, billing, social posting, teams, and scheduling out of scope until the core pipeline is stronger
+
+## Contributing
+
+Start with [CONTRIBUTING.md](CONTRIBUTING.md). Keep changes backend-first, fixture-verifiable, and
+inside the documented output contract. Do not add private media, credentials, account systems, or
+generated artifacts.
 
 ## Documentation
 
@@ -272,6 +264,8 @@ output/demo-fixture/
 - [Model providers](docs/model-providers.md)
 - [Secrets](docs/secrets.md)
 - [Troubleshooting](docs/troubleshooting.md)
+- [Licensing](docs/licensing.md)
+- [Examples](examples/README.md)
 
 ## License
 

@@ -4,7 +4,7 @@ from fastapi import HTTPException
 
 from cliplab_api.main import _resolve_job_output_dir
 from cliplab_clip_intelligence import ModelProviderError, OpenRouterClipModelProvider
-from cliplab_pipeline import RemotionRendererClient
+from cliplab_pipeline import ClipLabPipeline, PipelineConfig, PipelineError, RemotionRendererClient
 from cliplab_video_processing.ffmpeg import MediaToolMissingError, require_ffmpeg, require_ffprobe
 from cliplab_video_processing.ingest import IngestError, ingest_source
 
@@ -49,6 +49,15 @@ def test_export_job_id_rejects_path_traversal():
         _resolve_job_output_dir("../private")
 
     assert excinfo.value.status_code == 400
+
+
+def test_pipeline_job_id_rejects_path_traversal_before_writing(tmp_path):
+    pipeline = ClipLabPipeline(config=PipelineConfig(output_root=tmp_path, render=False))
+
+    with pytest.raises(PipelineError, match="job_id"):
+        pipeline.run(source=str(tmp_path / "missing.mp4"), job_id="../escape")
+
+    assert not (tmp_path.parent / "escape").exists()
 
 
 def test_openrouter_missing_key_fails_only_when_provider_is_used():

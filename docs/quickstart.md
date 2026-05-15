@@ -6,30 +6,32 @@
 git clone https://github.com/sommbc/clip-lab.git
 cd clip-lab
 cp .env.example .env
-docker compose up --build
+docker compose up -d --build --wait
 ```
 
 In another terminal, run the fixture pipeline without rendering:
 
 ```bash
-docker compose exec api clip-lab ./fixtures/sample.mp4 \
-  --transcript-json ./fixtures/sample.transcript.json \
-  --output-root output \
+docker compose exec -T api clip-lab /app/fixtures/sample.mp4 \
+  --transcript-json /app/fixtures/sample.transcript.json \
+  --output-root /app/output \
+  --job-id quickstart-fixture \
   --no-render
 ```
 
 Then run the full render path:
 
 ```bash
-docker compose exec api clip-lab ./fixtures/sample.mp4 \
-  --transcript-json ./fixtures/sample.transcript.json \
-  --output-root output
+docker compose exec -T api clip-lab /app/fixtures/sample.mp4 \
+  --transcript-json /app/fixtures/sample.transcript.json \
+  --output-root /app/output \
+  --job-id quickstart-render
 ```
 
 Inspect results:
 
 ```bash
-find output -maxdepth 4 -type f | sort
+find output/quickstart-fixture -maxdepth 4 -type f | sort
 ```
 
 ## Expected Output
@@ -53,7 +55,7 @@ Check status:
 curl http://localhost:8000/api/jobs/<job_id>
 ```
 
-## Optional Web Demo
+## Optional Browser UI
 
 The web app is not required for backend development:
 

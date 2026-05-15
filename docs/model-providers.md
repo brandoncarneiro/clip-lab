@@ -31,19 +31,19 @@ CLIP_LAB_MODEL_PROVIDER=openrouter
 OPENROUTER_API_KEY=
 OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
 
-CLIP_LAB_CANDIDATE_MODEL=inclusionai/ring-2.6-1t:free
-CLIP_LAB_CRITIC_MODEL=nvidia/nemotron-3-super-120b-a12b:free
-CLIP_LAB_PACKAGING_MODEL=nvidia/nemotron-3-super-120b-a12b:free
+CLIP_LAB_CANDIDATE_MODEL=
+CLIP_LAB_CRITIC_MODEL=
+CLIP_LAB_PACKAGING_MODEL=
 
-CLIP_LAB_CANDIDATE_FALLBACK_MODEL=nvidia/nemotron-3-super-120b-a12b:free
-CLIP_LAB_CRITIC_FALLBACK_MODEL=openai/gpt-oss-120b:free
-CLIP_LAB_PACKAGING_FALLBACK_MODEL=z-ai/glm-4.5-air:free
+CLIP_LAB_CANDIDATE_FALLBACK_MODEL=
+CLIP_LAB_CRITIC_FALLBACK_MODEL=
+CLIP_LAB_PACKAGING_FALLBACK_MODEL=
 
-CLIP_LAB_EVAL_MODEL_1=inclusionai/ring-2.6-1t:free
-CLIP_LAB_EVAL_MODEL_2=nvidia/nemotron-3-super-120b-a12b:free
-CLIP_LAB_EVAL_MODEL_3=openai/gpt-oss-120b:free
-CLIP_LAB_EVAL_MODEL_4=z-ai/glm-4.5-air:free
-CLIP_LAB_EVAL_MODEL_5=openrouter/owl-alpha
+CLIP_LAB_EVAL_MODEL_1=
+CLIP_LAB_EVAL_MODEL_2=
+CLIP_LAB_EVAL_MODEL_3=
+CLIP_LAB_EVAL_MODEL_4=
+CLIP_LAB_EVAL_MODEL_5=
 ```
 
 Default model roles:
@@ -60,16 +60,10 @@ matching fallback once:
 - `CLIP_LAB_CRITIC_FALLBACK_MODEL`
 - `CLIP_LAB_PACKAGING_FALLBACK_MODEL`
 
-Eval model slugs:
-
-- `inclusionai/ring-2.6-1t:free`
-- `nvidia/nemotron-3-super-120b-a12b:free`
-- `openai/gpt-oss-120b:free`
-- `z-ai/glm-4.5-air:free`
-- `openrouter/owl-alpha`
-
-Verify these model IDs in OpenRouter before relying on them. Free model availability, rate limits,
-and response behavior can change without a Clip Lab code change.
+OpenRouter model IDs are intentionally not pinned in `.env.example`. Free model availability, rate
+limits, and response behavior can change without a Clip Lab code change. Pick current model IDs from
+OpenRouter, keep them in local `.env`, and expect occasional provider-side failures or empty
+responses.
 
 ## CLI Usage
 

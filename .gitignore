@@ -1,3 +1,25 @@
+# Public tree guardrail. This repo is intentionally limited to Clip Lab files.
+/*
+!/.dockerignore
+!/.env.example
+!/.github/
+!/.gitignore
+!/CODE_OF_CONDUCT.md
+!/CONTRIBUTING.md
+!/LICENSE
+!/LICENSES/
+!/NOTICE.md
+!/README.md
+!/SECURITY.md
+!/apps/
+!/docker-compose.yml
+!/docs/
+!/examples/
+!/fixtures/
+!/packages/
+!/pyproject.toml
+!/tests/
+
 # Local environment and secrets
 .env
 .env.*
@@ -78,3 +100,10 @@ AGENTS.md
 CLAUDE.md
 .claude/
 .codex/
+.playwright-mcp/
+
+# Local audit and database artifacts
+*.log
+*.dump
+*.sqlite
+*.sqlite3

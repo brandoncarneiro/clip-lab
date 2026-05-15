@@ -60,7 +60,7 @@ export async function executeRender(params: RenderParams): Promise<void> {
       ? path.resolve(process.env.OUTPUT_DIR)
       : path.resolve(import.meta.dirname, "../../output");
 
-    const jobOutputDir = path.join(outputDir, jobId);
+    const jobOutputDir = resolveJobOutputDir(outputDir, jobId);
     fs.mkdirSync(jobOutputDir, { recursive: true });
 
     const outputLocation = resolveOutputLocation(
@@ -102,6 +102,15 @@ export async function executeRender(params: RenderParams): Promise<void> {
 
     console.error(`[render-worker] Render ${renderId} failed:`, err);
   }
+}
+
+function resolveJobOutputDir(outputDir: string, jobId: string): string {
+  const root = path.resolve(outputDir);
+  const resolved = path.resolve(root, jobId);
+  if (resolved !== root && !resolved.startsWith(`${root}${path.sep}`)) {
+    throw new Error(`Invalid jobId outside output directory: ${jobId}`);
+  }
+  return resolved;
 }
 
 function resolveOutputLocation(

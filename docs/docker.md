@@ -41,7 +41,7 @@ Default host mounts:
 - `./uploads` to `/app/uploads`
 - `./fixtures` to `/app/fixtures` read-only
 
-The optional demo web app is behind a Compose profile:
+The optional browser UI is behind a Compose profile:
 
 ```bash
 docker compose --profile web up --build
@@ -50,9 +50,10 @@ docker compose --profile web up --build
 ## Verify Without WhisperX
 
 ```bash
-docker compose exec api clip-lab ./fixtures/sample.mp4 \
-  --transcript-json ./fixtures/sample.transcript.json \
-  --output-root output \
+docker compose exec -T api clip-lab /app/fixtures/sample.mp4 \
+  --transcript-json /app/fixtures/sample.transcript.json \
+  --output-root /app/output \
+  --job-id docker-fixture-no-render \
   --no-render
 ```
 
@@ -63,9 +64,10 @@ model provider.
 ## Verify Full Render
 
 ```bash
-docker compose exec api clip-lab ./fixtures/sample.mp4 \
-  --transcript-json ./fixtures/sample.transcript.json \
-  --output-root output
+docker compose exec -T api clip-lab /app/fixtures/sample.mp4 \
+  --transcript-json /app/fixtures/sample.transcript.json \
+  --output-root /app/output \
+  --job-id docker-fixture-render
 ```
 
 The API calls `http://renderer:3100`, and both containers write to the shared output mount.

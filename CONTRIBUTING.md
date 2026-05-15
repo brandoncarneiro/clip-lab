@@ -13,9 +13,10 @@ docker compose up --build
 Run the fixture path without external keys:
 
 ```bash
-docker compose exec api clip-lab ./fixtures/sample.mp4 \
-  --transcript-json ./fixtures/sample.transcript.json \
-  --output-root output \
+docker compose exec -T api clip-lab /app/fixtures/sample.mp4 \
+  --transcript-json /app/fixtures/sample.transcript.json \
+  --output-root /app/output \
+  --job-id contributor-fixture \
   --no-render
 ```
 
@@ -36,7 +37,7 @@ cd apps/renderer && npm ci && npm run build
 cd service && npm ci && npm run build
 ```
 
-Optional web demo:
+Optional browser UI:
 
 ```bash
 cd apps/web && npm ci && npm run build

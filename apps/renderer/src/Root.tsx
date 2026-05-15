@@ -15,7 +15,7 @@ const DEFAULT_PROPS: ShortVideoProps = {
       { text: "This", startMs: 0, endMs: 400 },
       { text: "is", startMs: 400, endMs: 600 },
       { text: "a", startMs: 600, endMs: 750 },
-      { text: "demo", startMs: 750, endMs: 1200 },
+      { text: "render", startMs: 750, endMs: 1200 },
       { text: "of", startMs: 1200, endMs: 1400 },
       { text: "animated", startMs: 1400, endMs: 2000 },
       { text: "subtitles", startMs: 2000, endMs: 2800 },

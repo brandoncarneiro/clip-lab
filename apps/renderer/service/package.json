@@ -1,8 +1,12 @@
 {
   "name": "clip-lab-render-service",
-  "version": "1.0.0",
+  "version": "0.1.0",
+  "description": "HTTP render service for Clip Lab Remotion jobs.",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",

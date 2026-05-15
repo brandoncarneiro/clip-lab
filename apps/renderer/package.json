@@ -1,8 +1,12 @@
 {
   "name": "clip-lab-renderer",
-  "version": "1.0.0",
+  "version": "0.1.0",
+  "description": "Remotion composition package for Clip Lab vertical clip rendering.",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "studio": "remotion studio",
     "render": "remotion render",

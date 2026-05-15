@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import uuid
 import zipfile
 from dataclasses import dataclass, field
@@ -38,6 +39,9 @@ class PipelineError(RuntimeError):
     pass
 
 
+JOB_ID_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}")
+
+
 def _env_path(name: str, default: str) -> Path:
     return Path(os.environ.get(name, default))
 
@@ -50,6 +54,16 @@ def _env_int(name: str, default: int) -> int:
         return int(raw)
     except ValueError as exc:
         raise PipelineError(f"{name} must be an integer, got: {raw}") from exc
+
+
+def _normalize_job_id(value: str | None) -> str:
+    job_id = value or str(uuid.uuid4())
+    if not JOB_ID_PATTERN.fullmatch(job_id):
+        raise PipelineError(
+            "job_id must start with a letter or number and contain only letters, numbers, "
+            "dots, underscores, or hyphens."
+        )
+    return job_id
 
 
 @dataclass(frozen=True)
@@ -91,8 +105,11 @@ class ClipLabPipeline:
         job_id: str | None = None,
         transcript: NormalizedTranscript | None = None,
     ) -> ClipExportMetadata:
-        job_id = job_id or str(uuid.uuid4())
-        output_dir = self.config.output_root / job_id
+        job_id = _normalize_job_id(job_id)
+        output_root = self.config.output_root.resolve()
+        output_dir = (output_root / job_id).resolve()
+        if output_dir != output_root and output_root not in output_dir.parents:
+            raise PipelineError(f"Invalid job id: {job_id}")
         source_dir = output_dir / "source"
         audio_dir = output_dir / "audio"
         raw_clips_dir = output_dir / "clips" / "raw"

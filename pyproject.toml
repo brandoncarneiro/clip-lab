@@ -8,8 +8,22 @@ version = "0.1.0"
 description = "Open-source pipeline for turning long-form video into polished short-form clips."
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "MIT" }
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [{ name = "Clip Lab contributors" }]
+keywords = ["video", "clips", "ffmpeg", "fastapi", "remotion", "transcription"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Framework :: FastAPI",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Multimedia :: Video",
+  "Topic :: Software Development :: Libraries :: Application Frameworks"
+]
 dependencies = [
   "fastapi>=0.110",
   "httpx>=0.27",
@@ -34,6 +48,12 @@ whisperx = [
 
 [project.scripts]
 clip-lab = "cliplab_api.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/sommbc/clip-lab"
+Repository = "https://github.com/sommbc/clip-lab"
+Issues = "https://github.com/sommbc/clip-lab/issues"
+Documentation = "https://github.com/sommbc/clip-lab#readme"
 
 [tool.setuptools.packages.find]
 where = [

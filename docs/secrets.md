@@ -51,9 +51,11 @@ files must stay outside git. Do not put cookie paths in committed docs, fixtures
 
 ## Audit Command
 
-Use a targeted local scan before publishing:
+Use targeted local scans before publishing:
 
 ```bash
-rg -n --hidden --glob '!node_modules/**' --glob '!output/**' \
-  'sk-[A-Za-z0-9]{20,}|Bearer [A-Za-z0-9]|cookie|PRIVATE_LOCAL_PATH'
+git ls-files | grep -E '^(\.env$|output/|uploads/|downloads/|models/|vendor/)'
+git grep -n -I -E '(sk-[A-Za-z0-9_-]{20,}|OPENROUTER_API_KEY=.+|HUGGINGFACE_TOKEN=.+|BEGIN (RSA|OPENSSH|PRIVATE) KEY|github_pat_|AKIA[0-9A-Z]{16})' -- . ':!docs/secrets.md'
 ```
+
+Both commands should print nothing for the tracked public tree.

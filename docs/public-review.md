@@ -22,4 +22,4 @@ Clip Lab is not a SaaS, scheduler, account system, posting tool, or production-h
 
 ## Maintenance Boundary
 
-Dependency automation should stay grouped and low-noise. Public pull requests that fail because of major framework churn should be closed or replaced with intentional upgrade work, not left open as stale red checks.
+Dependency changes should be intentional, reviewed against the media pipeline, and verified through CI. Public pull requests that fail because of major framework churn should be closed or replaced with deliberate upgrade work, not left open as stale red checks.
